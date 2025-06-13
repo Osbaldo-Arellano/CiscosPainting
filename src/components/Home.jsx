@@ -111,8 +111,21 @@ export default function Home() {
       </Box>
 
       {/* About Section */}
-      <Box sx={{ py: { xs: 8, md: 10 }, px: 9, width: '100%' }}>
-        <Typography variant="h5" sx={{ color: '#ccc' }}>
+      <Box sx={{ width: '100%',
+        height: '100vh',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        px: 9,
+        py: { xs: 8, md: 9 },
+        position: 'relative',
+        flexDirection: 'column', // Stack vertically
+        textAlign: 'left',
+        bgcolor: '#181818',
+        ml: 10,
+        m: 10
+}}>
+        <Typography variant="h5" sx={{ color: '#ccc', alignSelf: 'flex-start'}}>
           02/ About Us
         </Typography>
         <Typography variant="h3" sx={{color: '#ccc',
@@ -123,6 +136,7 @@ export default function Home() {
                 //   textDecoration: 'underline',
                 //   textUnderlineOffset: '6px', 
                 //   textDecorationThickness: '2px', 
+                alignSelf: 'flex-start',
         }}>
           Reviving Homes, Restoring Trust
         </Typography>
@@ -212,8 +226,7 @@ export default function Home() {
         sx={{
             width: '100%',
             px: { xs: 2, md: 4 },
-            bgcolor: '#181818',
-            py: 6,
+            // bgcolor: '#181818',
             overflow: 'hidden',
             display: 'flex',
             justifyContent: 'center',
@@ -231,6 +244,7 @@ export default function Home() {
             flexWrap: { xs: 'wrap', md: 'nowrap' },
             justifyContent: 'center',
             alignItems: 'stretch',
+            mr:"10%",
             }}
         >
             {[
@@ -242,9 +256,9 @@ export default function Home() {
             <Box
                 key={index}
                 sx={{
-                flex: '1 1 220px', // flexible basis + grow/shrink
-                py: { xs: 6, md: 8 },
-                px: { xs: 2, md: 8 },
+                flex: '1 1 120px', // flexible basis + grow/shrink
+                py: { xs: 6, md: 5 },
+                px: { xs: 2, md: 5 },
                 background: gradient,
                 color: '#fff',
                 textAlign: 'center',
@@ -272,7 +286,7 @@ export default function Home() {
                     left: '-20%',
                     width: '150%',
                     height: '150%',
-                    background: 'radial-gradient(circle, rgba(255,255,255,0.2), transparent)',
+                    background: 'non-gradient(circle, rgba(255,255,255,0.2), transparent)',
                     transform: 'scale(1)',
                     opacity: 0.1,
                     transition: 'all 0.5s ease',
