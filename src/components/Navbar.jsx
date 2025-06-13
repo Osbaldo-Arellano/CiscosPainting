@@ -1,39 +1,50 @@
-import { AppBar, Toolbar, Typography, Button, Box, Link, Menu, MenuItem } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { AppBar, Toolbar, Button, Box, Link, Menu, MenuItem, Popper, Paper, Grow, ClickAwayListener, MenuList } from '@mui/material';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import { useState, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { Fab, Zoom } from '@mui/material';
 
 export default function Navbar() {
-  const greySemiTransparent = 'rgba(255, 255, 255, 0.92)';
-  const [scrolled, setScrolled] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
+  const anchorRef = useRef(null);
 
+  const handleToggle = () => setOpen((prevOpen) => !prevOpen);
+  const handleClose = (event) => {
+    if (anchorRef.current && anchorRef.current.contains(event.target)) {
+      return;
+    }
+    setOpen(false);
+  };
+
+  function handleListKeyDown(event) {
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      setOpen(false);
+    } else if (event.key === 'Escape') {
+      setOpen(false);
+    }
+  }
+
+  // Return focus to the button when transitioning from menu closed
+  const prevOpen = useRef(open);
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+    if (prevOpen.current === true && open === false) {
+      anchorRef.current.focus();
+    }
+    prevOpen.current = open;
+  }, [open]);
 
   return (
-    <Box
-      sx={{
-        position: 'sticky',
-        top: 0,
-        zIndex: theme => theme.zIndex.appBar + 1,
-        backgroundColor: 'white',
-        boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
-        fontFamily: '"Inter", sans-serif',
-        color: greySemiTransparent,
-      }}
-    >
-      {/* Top red bar */}
+    <>
+      {/* Sticky Top Bar */}
       <Box
         sx={{
+          position: 'sticky',
+          top: 0,
           backgroundColor: '#b71c1c',
-          color: greySemiTransparent,
+          color: '#fff',
           px: { xs: 2, md: 9 },
           py: 0.8,
           display: 'flex',
@@ -41,237 +52,220 @@ export default function Navbar() {
           alignItems: 'center',
           fontSize: '0.9rem',
           fontFamily: '"Inter", sans-serif',
+          zIndex: 1200,
         }}
       >
-        <Typography variant="body2" sx={{ fontWeight: 500, color: greySemiTransparent }}>
-          To inquire please fill out a{' '}
-          <Link
-            href="/quote"
-            underline="hover"
-            sx={{
-              color: 'white',
-              fontWeight: 'bold',
-              '&:hover': { color: '#ffcdd2' },
-            }}
-          >
-            FREE quote request HERE
-          </Link>
-        </Typography>
+        <Link
+          href="/quote"
+          underline="hover"
+          sx={{
+            color: 'white',
+            fontWeight: 500,
+            '&:hover': { color: '#ffcdd2' },
+          }}
+        >
+          FREE quote request HERE
+        </Link>
 
         <Link
-          href="tel:5032367003"
+          href="tel:5039999060"
           underline="hover"
           sx={{
             color: 'white',
             fontWeight: 600,
             fontSize: '1rem',
-            transition: 'color 0.3s ease',
             '&:hover': { color: '#ffcdd2' },
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            fontFamily: '"Inter", sans-serif',
           }}
         >
-          📞 (503) 236-7003
+          📞 (503) 999-9060
         </Link>
       </Box>
 
-      {/* Main navbar */}
+      {/* Main Navbar */}
       <AppBar
-        position="static"
-        elevation={4}
+        position="absolute"
+        elevation={0}
         sx={{
-          backgroundColor: 'rgb(34, 33, 33, .9)',
-          color: greySemiTransparent,
+          backgroundColor: 'transparent',
+          boxShadow: 'none',
+          top: 0,
+          left: 0,
+          width: '100%',
           px: { xs: 2, md: 9 },
-          py: 2,
-          fontFamily: '"Inter", sans-serif',
+          py: 1,
+          zIndex: 1100,
         }}
       >
         <Toolbar disableGutters sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          {/* Logo overlapping the navbar */}
-          <Box sx={{ position: 'absolute', top: scrolled ? 3 : -10 }}>
+          {/* Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mt: 5 }}>
             <img
-              src={scrolled ? "images/small-logo.png" : "images/logo.png"}
+              src="images/logo.png"
               alt="Logo"
-              style={{
-                height: scrolled ? 60 : 200,
-                objectFit: 'contain',
-                transition: 'all .5s ease',
-              }}
+              style={{ height: 150 }}
             />
           </Box>
 
           {/* Nav Links */}
-          <Box
-            sx={{
-              display: 'flex',
-              gap: { xs: 1, md: 2.5 },
-              alignItems: 'center',
-              flexGrow: 1,
-              justifyContent: 'center',
-              fontFamily: '"Inter", sans-serif',
-            }}
-          >
-            <Button
-              component={RouterLink}
-              to="/"
-              sx={navLinkStyles(greySemiTransparent)}
-            >
-              Home
-            </Button>
+          <Box sx={{ display: 'flex', alignItems: 'center', ml: 4, gap: 2 }}>
+            <NavLink to="/" current={location.pathname === '/'}>Home</NavLink>
 
-            {/* Services Dropdown */}
             <Box
-              onMouseEnter={handleMenuOpen}
-              onMouseLeave={handleMenuClose}
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+              sx={{ position: 'relative' }}
             >
               <Button
-                onClick={handleMenuOpen}
-                endIcon={
-                  <KeyboardArrowDownIcon
-                    sx={{
-                      transition: 'transform 0.3s ease',
-                      transform: anchorEl ? 'rotate(180deg)' : 'rotate(0deg)',
-                      color: greySemiTransparent,
-                    }}
-                  />
-                }
-                sx={navLinkStyles(greySemiTransparent)}
+                ref={anchorRef}
+                onClick={handleToggle}
+                endIcon={<KeyboardArrowDownIcon sx={{ color: '#fff' }} />}
+                sx={navLinkButtonStyle(location.pathname.startsWith('/services'))}
               >
                 Services
               </Button>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-                fontFamily='"Inter", sans-serif'
-                sx={{
-                    '& .MuiPaper-root': {
-                    backgroundColor: 'rgba(0,0,0,0.6)',
-                    },
-                }}
+
+              <Popper
+                open={open}
+                anchorEl={anchorRef.current}
+                role={undefined}
+                placement="bottom-start"
+                transition
+                disablePortal
+                sx={{ zIndex: 1200 }}
               >
-                <MenuItem component={RouterLink} to="/services/interior" onClick={handleMenuClose} sx={{
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        px: 3,
-                        py: 1,
-                        ml: { xs: 0, md: -2 },
-                        fontWeight: 'bold',
-                        fontFamily: '"Inter", sans-serif',
-                        textTransform: 'none',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(163, 24, 24, 0.8)',
-                            boxShadow: '0 6px 12px rgba(163, 24, 24, 0.5)',
-                        },
-                        }}>
-                  Interior Painting
-                </MenuItem>
-                <MenuItem fontFamily='"Inter", sans-serif' component={RouterLink} to="/services/exterior" onClick={handleMenuClose} sx={{
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        px: 3,
-                        py: 1,
-                        ml: { xs: 0, md: -2 },
-                        fontWeight: 'bold',
-                        fontFamily: '"Inter", sans-serif',
-                        textTransform: 'none',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(163, 24, 24, 0.8)',
-                            boxShadow: '0 6px 12px rgba(163, 24, 24, 0.5)',
-                        },
-                        }}>
-                    Exterior Painting
-                </MenuItem>
-                <MenuItem fontFamily='"Inter", sans-serif' component={RouterLink} to="/services/commercial" onClick={handleMenuClose}
-                sx={{
-                        color: 'rgba(255, 255, 255, 0.8)',
-                        px: 3,
-                        py: 1,
-                        ml: { xs: 0, md: -2 },
-                        fontWeight: 'bold',
-                        fontFamily: '"Inter", sans-serif',
-                        textTransform: 'none',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
-                        '&:hover': {
-                            backgroundColor: 'rgba(163, 24, 24, 0.8)',
-                            boxShadow: '0 6px 12px rgba(163, 24, 24, 0.5)',
-                        },
-                        }}>
-                  Commercial
-                </MenuItem>
-              </Menu>
+                {({ TransitionProps }) => (
+                  <Grow {...TransitionProps} style={{ transformOrigin: 'top left' }}>
+                    <Paper
+                      sx={{
+                        backgroundColor: 'rgba(30,30,30,0.95)',
+                        color: '#fff',
+                        mt: 1,
+                      }}
+                    >
+                      <ClickAwayListener onClickAway={handleClose}>
+                        <MenuList
+                          autoFocusItem={open}
+                          id="services-menu"
+                          onKeyDown={handleListKeyDown}
+                          sx={{ p: 0 }}
+                        >
+                          <MenuItem component={RouterLink} to="/services/interior" onClick={handleClose}>Interior Painting</MenuItem>
+                          <MenuItem component={RouterLink} to="/services/exterior" onClick={handleClose}>Exterior Painting</MenuItem>
+                          <MenuItem component={RouterLink} to="/services/commercial" onClick={handleClose}>Commercial</MenuItem>
+                        </MenuList>
+                      </ClickAwayListener>
+                    </Paper>
+                  </Grow>
+                )}
+              </Popper>
             </Box>
 
-            <Button
-              component={RouterLink}
-              to="/projects"
-              sx={navLinkStyles(greySemiTransparent)}
-            >
-              Gallery
-            </Button>
-            <Button
-              component={RouterLink}
-              to="/about"
-              sx={navLinkStyles(greySemiTransparent)}
-            >
-              About
-            </Button>
-            <Button
-              component={RouterLink}
-              to="/contact"
-              sx={navLinkStyles(greySemiTransparent)}
-            >
-              Contact
-            </Button>
+            <NavLink to="/projects" current={location.pathname === '/projects'}>Gallery</NavLink>
+            <NavLink to="/about" current={location.pathname === '/about'}>About</NavLink>
+            <NavLink to="/contact" current={location.pathname === '/contact'}>Contact</NavLink>
           </Box>
 
           {/* Estimate Button */}
           <Button
-            variant="contained"
             component={RouterLink}
             to="/estimate"
+            variant="outlined"
             sx={{
-              backgroundColor: 'rgba(0,0,0,0.4)',
-              color: 'rgba(255, 255, 255, 0.8)',
+              ml: 3,
+              px: 2.5,
+              py: 0.8,
+              color: '#fff',
+              borderColor: '#fff',
               borderRadius: '999px',
-              px: 3,
-              py: 1,
-              ml: { xs: 0, md: 2 },
-              fontWeight: 'bold',
-              fontFamily: '"Inter", sans-serif',
               textTransform: 'none',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.3)',
+              fontWeight: 500,
               '&:hover': {
-                backgroundColor: 'rgba(163, 24, 24, 0.8)',
-                boxShadow: '0 6px 12px rgba(163, 24, 24, 0.5)',
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                borderColor: '#fff',
               },
             }}
           >
             Get Estimate
           </Button>
         </Toolbar>
+        <ScrollTopButton />
       </AppBar>
-    </Box>
+    </>
   );
 }
 
-const navLinkStyles = (color) => ({
-  color,
-  fontWeight: 10,
-  fontFamily: '"Inter", sans-serif',
+function ScrollTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setVisible(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleClick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  return (
+    <Zoom in={visible}>
+      <Fab
+        color="primary"
+        size="small"
+        onClick={handleClick}
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          zIndex: 1300,
+          bgcolor: '#b71c1c',
+          color: '#fff',
+          '&:hover': { bgcolor: '#d32f2f' },
+        }}
+      >
+        <KeyboardArrowUpIcon />
+      </Fab>
+    </Zoom>
+  );
+}
+
+function NavLink({ to, children, current }) {
+  return (
+    <Button
+      component={RouterLink}
+      to={to}
+      sx={{
+        color: '#fff',
+        textTransform: 'none',
+        fontSize: '1.1rem',
+        fontWeight: 400,
+        position: 'relative',
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          left: 0,
+          bottom: -4,
+          width: current ? '100%' : '0%',
+          height: 2,
+          backgroundColor: '#b71c1c',
+          transition: 'width 0.3s ease',
+        },
+        '&:hover::after': {
+          width: '100%',
+        },
+      }}
+    >
+      {children}
+    </Button>
+  );
+}
+
+const navLinkButtonStyle = (isActive) => ({
+  color: '#fff',
   textTransform: 'none',
-  fontSize: '1.2rem',
-  px: 1,
-  py: 0.5,
-  borderRadius: '8px',
-  transition: 'all 0.2s ease',
+  fontSize: '1.1rem',
+  fontWeight: 400,
   '&:hover': {
-    color: 'rgba(183, 28, 28, 0.8)',
-    backgroundColor: 'rgba(255, 250, 250, 0.05)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
 });

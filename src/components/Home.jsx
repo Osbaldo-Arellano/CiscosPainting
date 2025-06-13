@@ -9,7 +9,7 @@ export default function Home() {
       <Box
         sx={{
           position: 'relative',
-          height: { xs: '85vh', md: '85vh' }, // Increased height for better overlay
+          height: { xs: '85vh', md: '100vh' }, // Increased height for better overlay
           width: '100%',
           backgroundImage: 'url(images/nice-house.jpg)',
           backgroundSize: 'cover',
@@ -71,7 +71,7 @@ export default function Home() {
         <Box
           sx={{
             position: 'absolute',
-            bottom: 20,
+            bottom: 100,
             px: 9,
             color: '#fff',
             maxWidth: 400,
